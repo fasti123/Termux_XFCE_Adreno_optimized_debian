@@ -170,13 +170,10 @@ sleep 1
 am start --user 0 -n com.termux.x11/com.termux.x11.MainActivity > /dev/null 2>&1
 sleep 1
 
-MESA_LOADER_DRIVER_OVERRIDE=zink TU_DEBUG=noconform GALLIUM_DRIVER=zink ZINK_DESCRIPTORS=lazy virgl_test_server --use-egl-surfaceless & > /dev/null 2>&1
+MESA_NO_ERROR=1 MESA_GL_VERSION_OVERRIDE=4.3COMPAT MESA_GLES_VERSION_OVERRIDE=3.2 virgl_test_server_android --angle-gl & > /dev/null 2>&1
 
-#GALLIUM_DRIVER=virpipe MESA_GL_VERSION_OVERRIDE=4.0 program
+env DISPLAY=:1.0 GALLIUM_DRIVER=virpipe dbus-launch --exit-with-session xfce4-session & > /dev/null 2>&1
 
-#MESA_LOADER_DRIVER_OVERRIDE=zink TU_DEBUG=noconform program
-
-env DISPLAY=:1.0 GALLIUM_DRIVER=zink dbus-launch --exit-with-session xfce4-session & > /dev/null 2>&1
 # Set audio server
 export PULSE_SERVER=127.0.0.1 > /dev/null 2>&1
 
