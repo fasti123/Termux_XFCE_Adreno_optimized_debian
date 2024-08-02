@@ -1,4 +1,4 @@
-Optimized for Adreno GPU's.
+Optimized for **Adreno GPU's**.
 
 # Install
 
