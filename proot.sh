@@ -82,5 +82,5 @@ cp .fonts/NotoColorEmoji-Regular.ttf $PREFIX/var/lib/proot-distro/installed-root
 
 #Setup Hardware Acceleration
 pd login debian --shared-tmp -- env DISPLAY=:1.0 wget https://github.com/fasti123/Termux_XFCE_Adreno_optimized_debian/raw/main/mesa-vulkan-kgsl_23.3.0-devel-20230815_arm64.deb
-#mv mesa-vulkan-kgsl_23.3.0-devel-20230815_arm64.deb $HOME/../usr/var/lib/proot-distro/installed-rootfs/debian/root/
+mv mesa-vulkan-kgsl_23.3.0-devel-20230815_arm64.deb $HOME/../usr/var/lib/proot-distro/installed-rootfs/debian/root/
 pd login debian --shared-tmp -- env DISPLAY=:1.0 sudo apt install -y ./mesa-vulkan-kgsl_23.3.0-devel-20230815_arm64.deb
