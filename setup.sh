@@ -43,7 +43,7 @@ proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 apt upgrade -y
 proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 apt install sudo wget nala jq flameshot conky-all libvulkan1 glmark2 -y
 
 #Install DRI3 patched driver
-wget https://github.com/fasti123/Termux_XFCE_Adreno_optimized_debian/raw/main/mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb
+wget https://github.com/fasti123/Termux_XFCE_Adreno_optimized_debian/raw/main/mesa-vulkan-kgsl_23.3.0-devel-20230815_arm64.deb
 mv mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb $HOME/../usr/var/lib/proot-distro/installed-rootfs/debian/root/
 proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 dpkg -i mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb
 proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 rm mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb
