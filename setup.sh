@@ -40,7 +40,13 @@ setup_proot() {
 proot-distro install debian
 proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 apt update
 proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 apt upgrade -y
-proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 apt install sudo wget nala jq flameshot conky-all -y
+proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 apt install sudo wget nala jq flameshot conky-all libvulkan1 glmark2 -y
+
+#Install DRI3 patched driver
+wget https://github.com/fasti123/Termux_XFCE_Adreno_optimized_debian/raw/main/mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb
+mv mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb $HOME/../usr/var/lib/proot-distro/installed-rootfs/debian/root/
+proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 dpkg -i mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb
+proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 rm mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb
 
 #Create user
 proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 groupadd storage
@@ -55,9 +61,13 @@ chmod u-w  $HOME/../usr/var/lib/proot-distro/installed-rootfs/debian/etc/sudoers
 #Set proot DISPLAY
 echo "export DISPLAY=:1.0" >> $HOME/../usr/var/lib/proot-distro/installed-rootfs/debian/home/$username/.bashrc
 
+#Set proot to use DRI3
+echo "export MESA_LOADER_DRIVER_OVERRIDE=zink" >> $HOME/../usr/var/lib/proot-distro/installed-rootfs/debian/home/$username/.bashrc
+echo "export TU_DEBUG=noconform" >> $HOME/../usr/var/lib/proot-distro/installed-rootfs/debian/home/$username/.bashrc
+
 #Set proot aliases
 echo "
-alias virgl='GALLIUM_DRIVER=virpipe '
+alias virgl='GALLIUM_DRIVER=zink '
 alias ls='eza -lF --icons'
 alias cat='bat '
 alias apt='sudo nala '
@@ -74,7 +84,7 @@ proot-distro login debian --shared-tmp -- env DISPLAY=:1.0 cp /usr/share/zoneinf
 
 setup_xfce() {
 #Install xfce4 desktop and additional packages
-pkg install git neofetch virglrenderer-android papirus-icon-theme xfce4 xfce4-goodies eza pavucontrol-qt bat jq nala wmctrl firefox netcat-openbsd termux-x11-nightly eza -y
+pkg install git neofetch mesa-zink virglrenderer-mesa-zink vulkan-loader-android glmark2 papirus-icon-theme xfce4 xfce4-goodies eza pavucontrol-qt bat jq nala wmctrl firefox netcat-openbsd termux-x11-nightly eza -y
 
 #Create .bashrc
 cp $HOME/../usr/var/lib/proot-distro/installed-rootfs/debian/etc/skel/.bashrc $HOME/.bashrc
@@ -107,7 +117,7 @@ chmod +x $HOME/Desktop/firefox.desktop
 cat <<'EOF' > ../usr/bin/prun
 #!/bin/bash
 varname=$(basename $HOME/../usr/var/lib/proot-distro/installed-rootfs/debian/home/*)
-proot-distro login debian --user $varname --shared-tmp -- env DISPLAY=:1.0 $@
+proot-distro login debian --user $varname --shared-tmp -- env DISPLAY=:1.0 MESA_LOADER_DRIVER_OVERRIDE=zink TU_DEBUG=noconform $@
 
 EOF
 chmod +x ../usr/bin/prun
@@ -229,13 +239,14 @@ mv $HOME/Desktop/kill_termux_x11.desktop $HOME/../usr/share/applications
 cat <<'EOF' > start
 #!/bin/bash
 
-MESA_NO_ERROR=1 MESA_GL_VERSION_OVERRIDE=4.3COMPAT MESA_GLES_VERSION_OVERRIDE=3.2 virgl_test_server_android --angle-gl & > /dev/null 2>&1
+MESA_LOADER_DRIVER_OVERRIDE=zink GALLIUM_DRIVER=zink ZINK_DESCRIPTORS=lazy virgl_test_server --use-egl-surfaceless &
+
 sleep 1
 XDG_RUNTIME_DIR=${TMPDIR} termux-x11 :1.0 &
 sleep 1
 am start --user 0 -n com.termux.x11/com.termux.x11.MainActivity > /dev/null 2>&1
 sleep 1
-env DISPLAY=:1.0 GALLIUM_DRIVER=virpipe dbus-launch --exit-with-session xfce4-session & > /dev/null 2>&1
+env DISPLAY=:1.0 GALLIUM_DRIVER=zink dbus-launch --exit-with-session xfce4-session & > /dev/null 2>&1
 
 sleep 5
 process_id=$(ps -aux | grep '[x]fce4-screensaver' | awk '{print $2}')
